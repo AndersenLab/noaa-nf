@@ -62,6 +62,7 @@ By default, the `stationaRy` package downloads 7 weather traits:
 | rh | Relative humidity, measured as a percentage, as calculated using the August-Roche-Magnus approximation. |
 
 ## Additional traits
+More traits can be downloaded in addition to the 7 default traits. Currently, no additional calculations have been with this data, look for updates and use at your own risk. Trait information can be found [here](https://www1.ncdc.noaa.gov/pub/data/ish/ish-format-document.pdf).
 
 | trait | description |
 | --- | --- |
