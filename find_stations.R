@@ -14,16 +14,12 @@ library(geosphere)
 # args[6] = all_data
 
 df <- readr::read_tsv(args[1])
-time_period <- as.numeric(args[2])
-events <- as.numeric(args[3])
-all_data <- args[5]
-important_trait <- args[4]
+time_period <- as.numeric(args[3])
+events <- as.numeric(args[4])
+all_data <- args[6]
+important_trait <- args[5]
 
 # download station data
-# download.file('ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-inventory.csv', 'isd-inventory.csv')
-# station_inventory <- read.csv('isd-inventory.csv') %>%
-#     mutate(id = paste(USAF, WBAN, sep = "-"))
-
 station_inventory <- read.csv(args[2]) %>%
     dplyr::mutate(id = paste(USAF, WBAN, sep = "-"))
 
@@ -56,7 +52,7 @@ st <- station_inventory %>%
 # if no stations, enter NA
 if(nrow(st) == 0) {
     print("Error. No station data avaiable for this time period. Entering 'NA'.")
-    wi2 <- wi %>%
+    wi <- wi %>%
         dplyr::mutate(nearest_station = NA,
                       station_distance = NA,
                       station_lat = NA,

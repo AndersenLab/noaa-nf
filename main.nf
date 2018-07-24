@@ -6,7 +6,6 @@
 // params.additional_data
 // params.events
 // params.out
-// params.stations --> must download wget 'ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-inventory.csv'
 
 // takes input csv with columns "isotype", "latitude", "longitude", and "isolation_date"
 // and returns a tsv file for each strain with added elevation from geonames package
@@ -44,6 +43,17 @@ process split_WI {
   """
 }
 
+process downloadStations { 
+  publishDir "${workflow.projectDir}/", mode: 'copy'
+
+  output:
+    file("isd-inventory.csv")
+
+  """
+  wget 'ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-inventory.csv'
+  """
+}
+
 
 // for each strain, finds the closest weather station and download relevant data
 process findStations {
@@ -58,7 +68,7 @@ process findStations {
 
 
   """
-  Rscript --vanilla `which find_stations.R` "${wi_location}" "${params.stations}" "${params.time_period}" "${params.events}" "${params.important_trait}" "${params.additional_data}"
+  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.time_period}" "${params.events}" "${params.important_trait}" "${params.additional_data}"
 
   """
 
