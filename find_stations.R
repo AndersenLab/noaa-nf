@@ -24,7 +24,7 @@ library(geosphere)
 df <- readr::read_tsv(args[1])
 time_period <- as.numeric(args[3])
 events <- as.numeric(args[4])
-all_data <- args[6]
+all_data <- "AA1"
 important_trait <- args[5]
 
 # download station data
