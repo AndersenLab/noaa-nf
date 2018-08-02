@@ -13,6 +13,14 @@ library(geosphere)
 # args[5] = important trait
 # args[6] = all_data
 
+# df <- read.csv("~/Dropbox/AndersenLab/LabFolders/Katie/git/noaa-nf/test_data/noaa_test.csv") %>% dplyr::filter(isotype == "CB4856")
+# time_period <- 3
+# events <- 10
+# all_data <- "AA1"
+# important_trait <- "temp"
+# station_inventory <- read.csv("~/isd-inventory.csv") %>%dplyr::mutate(id = paste(USAF, WBAN, sep = "-"))
+
+# inputs
 df <- readr::read_tsv(args[1])
 time_period <- as.numeric(args[3])
 events <- as.numeric(args[4])
@@ -84,7 +92,7 @@ if(nrow(st) == 0) {
                                                             select_additional_data = all_data) %>%
         dplyr::mutate(date = ymd(paste(year, month, day, sep = "-"))) %>%
         dplyr::filter(date >= wi$start_date[1], date <= wi$end_date[1]) %>%
-        dplyr::select(lat:date, -time, -date)
+        dplyr::select(lat:date, -time)
     
     #If there is no data for important_variable, choose another station
     if(!is.null(important_trait)) {
@@ -102,7 +110,7 @@ if(nrow(st) == 0) {
                                                              select_additional_data = all_data) %>%
                 dplyr::mutate(date = ymd(paste(year, month, day, sep = "-"))) %>%
                 dplyr::filter(date >= wi$start_date[1], date <= wi$end_date[1]) %>%
-                dplyr::select(lat:date, -time, -date)
+                dplyr::select(lat:date, -time)
             
             count <- count + 1
         }
@@ -111,33 +119,59 @@ if(nrow(st) == 0) {
     # BETTER WAY TO DEAL WITH MISSING DATA??
     # remove NA values from station_data (hack: just remove anything with '99' or more or if val = 9)
     # some columns might have a 9 or 99 that is a real value. This is conservative.
-    station_data <- data.frame(lapply(station_data, function(x) as.numeric(as.character(x))))
+    # station_data <- data.frame(lapply(station_data, function(x) as.numeric(as.character(x))))
     
-    # not pretty but it works
-    for(i in 1:ncol(station_data)) {
-        for(j in 1:nrow(station_data)) {
-            if(!identical(integer(0), grep(99, station_data[j,i])) | identical(station_data[j,i], 9)) {
-                station_data[j,i] <- NA
-            }
-        }
-    }
+    # remove missing data
+    station_data$wd[station_data$wd == 999] <- NA
+    station_data$ws[station_data$ws == 9999] <- NA
+    station_data$ceil_hgt[station_data$ceil_hgt == 99999] <- NA
+    station_data$temp[station_data$temp == '+9999'] <- NA
+    station_data$dew_point[station_data$dew_point == '+9999'] <- NA
+    station_data$atmos_pres[station_data$atmos_pres == 99999] <- NA
+    station_data$aa1_1[station_data$aa1_1 == 99] <- NA
+    station_data$aa1_2[station_data$aa1_2 == 9999] <- NA
+    station_data$aa1_1[station_data$aa1_4 %in% c(2, 3, 6, 7)] <- NA
+    station_data$aa1_2[station_data$aa1_4 %in% c(2, 3, 6, 7)] <- NA
     
-    # ADDITIONAL DATA NEED TO BE TIDYED???
+
+    # # not pretty but it works
+    # for(i in 1:(ncol(station_data)-1)) {
+    #     for(j in 1:nrow(station_data)) {
+    #         if(!identical(integer(0), grep(99, station_data[j,i])) | identical(station_data[j,i], 9)) {
+    #             station_data[j,i] <- NA
+    #         }
+    #     }
+    # }
+    
+    # Clean up the preciptation columns
+    # aa1_1 = period quantity (hours), aa1_2 = depth dimension, aa1_4 = quality
+    station_data <- station_data %>%
+        dplyr::mutate(precip = aa1_2 / aa1_1) %>%
+        dplyr::select(-c(aa1_1, aa1_2, aa1_3, aa1_4))
 
     # add traits to wi dataframe
     get_quartiles <- function(trait) {
         val <- station_data %>%
-            dplyr::pull(trait)
+            dplyr::group_by(date) %>%
+            dplyr::summarize(min = min(get(trait), na.rm = T),
+                             max = max(get(trait), na.rm = T),
+                             q10 = quantile(get(trait), probs = 0.1, na.rm = T)[[1]],
+                             q25 = quantile(get(trait), probs = 0.25, na.rm = T)[[1]],
+                             mean = mean(get(trait), na.rm = T),
+                             median = median(get(trait), na.rm = T),
+                             q75 = quantile(get(trait), probs = 0.75, na.rm = T)[[1]],
+                             q90 = quantile(get(trait), probs = 0.9, na.rm = T)[[1]])
+
         
-        # get quartiles of data
-        min <- min(val, na.rm = T)
-        max <- min(val, na.rm = T)
-        q10 <- quantile(val, probs = 0.1, na.rm = T)[[1]]
-        q25 <- quantile(val, probs = 0.25, na.rm = T)[[1]]
-        mean <- mean(val, na.rm = T)[[1]]
-        median <- median(val, na.rm = T)[[1]]
-        q75 <- quantile(val, probs = 0.75, na.rm = T)[[1]]
-        q90 <- quantile(val, probs = 0.9, na.rm = T)[[1]]
+        # # get quartiles of data
+        min <- mean(val$min, na.rm = T)
+        max <- mean(val$max, na.rm = T)
+        q10 <- mean(val$q10, na.rm = T)
+        q25 <- mean(val$q25, na.rm = T)
+        mean <- mean(val$mean, na.rm = T)
+        median <- mean(val$median, na.rm = T)
+        q75 <- mean(val$q75, na.rm = T)
+        q90 <- mean(val$q90, na.rm = T)
         
         return(paste(c(min, q10, q25, mean, median, q75, q90, max), collapse = ","))
     }
@@ -153,7 +187,7 @@ if(nrow(st) == 0) {
         dplyr::select(-c(lat, lon, elev))
     
     # add quartiles for rest of station_data to wi dataframe
-    for(i in names(station_data)) {
+    for(i in (names(station_data)[names(station_data) != "date"])) {
         wi <- wi %>%
             dplyr::mutate(!!i := get_quartiles(i)) %>% #assign variable dynamically!!!
             tidyr::separate(!!i, into = c(paste0("min.", i), paste0("q10.", i),
@@ -167,7 +201,7 @@ if(nrow(st) == 0) {
         tidyr::gather(trait, value, -c(isotype:station_elev))
 }
     
-    readr::write_tsv(wi, paste0(wi$isotype[1], ".noaa.tsv"))
+readr::write_tsv(wi, paste0(wi$isotype[1], ".noaa.tsv"))
     
 
     

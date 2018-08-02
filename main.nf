@@ -1,11 +1,12 @@
 #! usr/bin/env nextflow
 
 // params.in
-// params.time_period
-// params.important_trait
-// params.additional_data
-// params.events
-// params.out
+params.months = '3'
+params.important_trait = 'NULL'
+params.additional_data = 'NULL'
+params.events = '10'
+date = new Date().format( 'yyyyMMdd' )
+params.out = "$date"
 
 // takes input csv with columns "isotype", "latitude", "longitude", and "isolation_date"
 // and returns a tsv file for each strain with added elevation from geonames package
@@ -68,7 +69,7 @@ process findStations {
 
 
   """
-  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.time_period}" "${params.events}" "${params.important_trait}" "${params.additional_data}"
+  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" "${params.additional_data}"
 
   """
 
