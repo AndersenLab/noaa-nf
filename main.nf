@@ -3,7 +3,6 @@
 // params.in
 params.months = '3'
 params.important_trait = 'NULL'
-params.additional_data = 'NULL'
 params.events = '10'
 date = new Date().format( 'yyyyMMdd' )
 params.out = "$date"
@@ -69,7 +68,7 @@ process findStations {
 
 
   """
-  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" "${params.additional_data}"
+  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" 
 
   """
 
