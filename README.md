@@ -25,10 +25,10 @@ Input file is a `.csv` file containing columns `isotype`, `latitude`, `longitude
 
 | isotype | latitude | longitude | isolation_date |
 | --- | --- | --- | --- |
-| AB1 | -34.93 | 138.59 | 1/1/83 |
-| CB4856 | 21.33 | -157.86 | 8/1/72 |
+| AB1 | -34.93 | 138.59 | 1983/01/01 |
+| CB4856 | 21.33 | -157.86 | 1972/08/01 |
 | ... | ... | ... | ... |
-| QX1211 | 37.7502 | -122.433 | 11/26/07 |
+| QX1211 | 37.7502 | -122.433 | 2007/11/26 |
 
 ## Optional Parameters
 | params | default | options | explanation |
