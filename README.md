@@ -47,7 +47,7 @@ nextflow run AndersenLab/noaa-nf --in='input.csv' --months='12' --events='100' -
 
 ## Traits
 ### Default traits
-By default, the `stationaRy` package downloads 7 weather traits:
+By default, the `stationaRy` package downloads 8 weather traits:
 
 | trait | description |
 | --- | --- |
