@@ -43,16 +43,16 @@ process split_WI {
   """
 }
 
-process downloadStations { 
-  publishDir "${workflow.projectDir}/", mode: 'copy'
+// process downloadStations { 
+//   publishDir "${workflow.projectDir}/", mode: 'copy'
 
-  output:
-    file("isd-inventory.csv")
+//   output:
+//     file("isd-inventory.csv")
 
-  """
-  wget 'ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-inventory.csv'
-  """
-}
+//   """
+//   wget 'ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-inventory.csv'
+//   """
+// }
 
 
 // for each strain, finds the closest weather station and download relevant data

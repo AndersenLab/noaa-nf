@@ -38,7 +38,7 @@ if(all_data == "NULL") all_data <- NULL
 days <- (time_period*30)/2 #use 30 days to represent a month
 
 wi <- df %>%
-    dplyr::mutate(isolation_date = mdy(as.character(isolation_date)),
+    dplyr::mutate(isolation_date = ymd(as.character(isolation_date)),
                   start_date = isolation_date - ddays(days),
                   end_date = isolation_date + ddays(days))
 
