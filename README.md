@@ -21,7 +21,7 @@ nextflow run AndersenLab/noaa-nf --in='infile.csv'
 ```
 
 ## Input
-Input file is a `.csv` file containing columns `isotype`, `latitude`, `longitude`, and `isolation_date`
+Input file is a `.csv` file containing columns `isotype`, `latitude`, `longitude`, and `isolation_date`. The isolation date should be in `YYYY-MM-DD` format.
 
 | isotype | latitude | longitude | isolation_date |
 | --- | --- | --- | --- |
