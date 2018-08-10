@@ -2,7 +2,7 @@
 
 Nextflow pipeline to pull weather data from NOAA weather stations around the world by GPS coordinates. Specified for Andersen Lab looking at weather surrounding date of isolation of *C. elegans* isotypes.
 
-### Requirements
+## Requirements
 Requires several R packages including "tidyverse", "geonames", "lubridate", "geosphere", and "stationaRy".
 
 ```
@@ -15,12 +15,12 @@ Also requires nextflow installation. Check out this [help page](https://www.next
 wget -qO- https://get.nextflow.io | bash
 ```
 
-### Usage
+## Usage
 ```
 nextflow run AndersenLab/noaa-nf --in='infile.csv'
 ```
 
-### Input
+## Input
 Input file is a `.csv` file containing columns `isotype`, `latitude`, `longitude`, and `isolation_date`
 
 | isotype | latitude | longitude | isolation_date |
@@ -44,11 +44,9 @@ Input file is a `.csv` file containing columns `isotype`, `latitude`, `longitude
 nextflow run AndersenLab/noaa-nf --in='input.csv' --months='12' --events='100' --out='example_test'
 ```
 
-### Missing Data
-Each trait downloaded from the NOAA weather stations (through `stationaRy`) has a different value for missing data. Most traits are either '9', '999', '-999' or '9999' etc. Currently, we employ an overly conservative removal of missing data by removing any value that equals 9 or any value that has two or more consecutive 9s (999, -99, 299...). In the future, this will be cleared up to be more accurate.
 
-### Traits
-## Default traits
+## Traits
+### Default traits
 By default, the `stationaRy` package downloads 7 weather traits:
 
 | trait | description |
