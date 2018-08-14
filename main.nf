@@ -68,7 +68,7 @@ process findStations {
 
 
   """
-  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" 
+  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" "${workflow.projectDir}/get_isd_station_data_fix.R"
 
   """
 
