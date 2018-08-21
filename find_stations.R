@@ -61,9 +61,17 @@ get_quartiles <- function(trait) {
 days <- (time_period*30)/2 #use 30 days to represent a month
 
 wi <- df %>%
-    dplyr::mutate(isolation_date = ymd(as.character(isolation_date)),
-                  start_date = isolation_date - ddays(days),
-                  end_date = isolation_date + ddays(days))
+    dplyr::mutate(isolation_date = lubridate::ymd(as.character(isolation_date)),
+                  start_date = isolation_date - lubridate::ddays(days),
+                  end_date = isolation_date + lubridate::ddays(days))
+
+# if the time period is unavailable, push it back
+# for example, 3 year data collected on 12/14/17
+if(wi$end_date[1] > lubridate::ymd(Sys.Date())) {
+    fake_isolation_date <- lubridate::ymd(Sys.Date()) - lubridate::ddays(days)
+    wi$start_date[1] <- fake_isolation_date - lubridate::ddays(days)
+    wi$end_date[1] <- fake_isolation_date + lubridate::ddays(days)
+}
 
 #Check if you need to download more than one year
 total_years <- year(wi$end_date[1]) - year(wi$start_date[1]) + 1
