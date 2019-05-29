@@ -19,7 +19,9 @@ process split_WI {
   """
   
   #!/usr/bin/env Rscript --vanilla
-  library(tidyverse)
+  library(dplyr)
+  library(tidyr)
+  library(readr)
   options(geonamesUsername="katiesevans")
   library(geonames)
 
