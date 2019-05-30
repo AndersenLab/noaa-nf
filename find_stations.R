@@ -5,11 +5,14 @@ args = commandArgs(trailingOnly=TRUE)
 source(args[6])
 
 library(lubridate)
-library(tidyverse)
+#library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(readr)
 library(stationaRy)
 library(geosphere)
 
-# args[1] = input dataframe
+# args[1] = input dat#aframe
 # args[2] = station dataframe
 # args[3] = time_period
 # args[4] = number of events per month
