@@ -56,8 +56,9 @@ get_quartiles <- function(trait) {
     median <- mean(val$median, na.rm = T)
     q75 <- mean(val$q75, na.rm = T)
     q90 <- mean(val$q90, na.rm = T)
+    sd <- sd(val$mean, na.rm = T)
     
-    return(paste(c(min, q10, q25, mean, median, q75, q90, max), collapse = ","))
+    return(paste(c(min, q10, q25, mean, median, q75, q90, max, sd), collapse = ","))
 }
 
 #update wi for start/end dates
