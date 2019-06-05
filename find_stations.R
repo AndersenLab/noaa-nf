@@ -105,62 +105,36 @@ if(nrow(st) == 0) {
                       value = NA)
 } else {
     # Filter stations based on location and year with data, find closest station
-    stations <- stationaRy::get_isd_stations(lower_lat = wi$latitude[1] - 10,
-                                             upper_lat = wi$latitude[1] + 10,
-                                             lower_lon = wi$longitude[1] - 10,
-                                             upper_lon = wi$longitude[1] + 10) %>%
+    stations <- stationaRy::get_isd_stations(lower_lat = wi$latitude[1] - 15,
+                                             upper_lat = wi$latitude[1] + 15,
+                                             lower_lon = wi$longitude[1] - 15,
+                                             upper_lon = wi$longitude[1] + 15) %>%
         dplyr::mutate(id = paste(usaf, wban, sep = "-")) %>%
         dplyr::filter(id %in% st$id) %>%
         dplyr::rowwise() %>%
         dplyr::mutate(dist_to_worm = geosphere::distm(c(wi$longitude[1], wi$latitude[1]), c(lon, lat))[1]) %>%
         dplyr::arrange(dist_to_worm)
     
-    # assign nearest station and station distance to worm
-    wi <- wi %>%
-        dplyr::mutate(nearest_station = stations$id[1],
-                      station_distance = stations$dist_to_worm[1]/1000)
+    if(nrow(stations) == 0) {
+            print("Error. No station data avaiable for this time period. Entering 'NA'.")
+            wi <- wi %>%
+                dplyr::mutate(nearest_station = NA,
+                              station_distance = NA,
+                              station_lat = NA,
+                              station_lon = NA,
+                              station_elev = NA,
+                              trait = NA,
+                              value = NA)
+        } else {
     
-    #Get station data using stationaRy package
-    #had to copy the function and change some lines of code because it was downloading extra years it didn't need
-    #use try/catch if there is an error with the file not existing, try the next closest station
-    station_data <- try(get_isd_station_data_fix(station_id = wi$nearest_station[1], 
-                                                 startyear = year(wi$start_date[1]), 
-                                                 endyear = year(wi$end_date[1]),
-                                                 select_additional_data = all_data) %>%
-                            dplyr::mutate(date = ymd(paste(year, month, day, sep = "-"))) %>%
-                            dplyr::filter(date >= wi$start_date[1], date <= wi$end_date[1]) %>%
-                            dplyr::select(lat:date, -time))
-    
-    #Check to see if the station_data file downloaded, if not, try the next closest station
-    count <- 2
-    while(class(station_data)[1] == "try-error") {
-        wi <- wi %>%
-            dplyr::mutate(nearest_station = stations$id[count],
-                          station_distance = stations$dist_to_worm[count]/1000)
-        
-        #Get station data using stationaRy package
-        station_data <- try(get_isd_station_data_fix(station_id = wi$nearest_station[1], 
-                                                     startyear = year(wi$start_date[1]), 
-                                                     endyear = year(wi$end_date[1]),
-                                                     select_additional_data = all_data) %>%
-                                dplyr::mutate(date = ymd(paste(year, month, day, sep = "-"))) %>%
-                                dplyr::filter(date >= wi$start_date[1], date <= wi$end_date[1]) %>%
-                                dplyr::select(lat:date, -time))
-        
-        count <- count + 1
-    }
-    
-    
-    #If there is no data for important_variable, choose another station
-    if(!is.null(important_trait)) {
-        # count <- 2
-        while(class(station_data)[1] == "try-error" || length(which(!is.na(station_data[[important_trait]]))) == 0) {
             # assign nearest station and station distance to worm
             wi <- wi %>%
-                dplyr::mutate(nearest_station = stations$id[count],
-                              station_distance = stations$dist_to_worm[count]/1000)
-            
+                dplyr::mutate(nearest_station = stations$id[1],
+                              station_distance = stations$dist_to_worm[1]/1000)
+
             #Get station data using stationaRy package
+            #had to copy the function and change some lines of code because it was downloading extra years it didn't need
+            #use try/catch if there is an error with the file not existing, try the next closest station
             station_data <- try(get_isd_station_data_fix(station_id = wi$nearest_station[1], 
                                                          startyear = year(wi$start_date[1]), 
                                                          endyear = year(wi$end_date[1]),
@@ -168,59 +142,98 @@ if(nrow(st) == 0) {
                                     dplyr::mutate(date = ymd(paste(year, month, day, sep = "-"))) %>%
                                     dplyr::filter(date >= wi$start_date[1], date <= wi$end_date[1]) %>%
                                     dplyr::select(lat:date, -time))
-            
-            count <- count + 1
+
+            #Check to see if the station_data file downloaded, if not, try the next closest station
+            count <- 2
+            while(class(station_data)[1] == "try-error") {
+                wi <- wi %>%
+                    dplyr::mutate(nearest_station = stations$id[count],
+                                  station_distance = stations$dist_to_worm[count]/1000)
+
+                #Get station data using stationaRy package
+                station_data <- try(get_isd_station_data_fix(station_id = wi$nearest_station[1], 
+                                                             startyear = year(wi$start_date[1]), 
+                                                             endyear = year(wi$end_date[1]),
+                                                             select_additional_data = all_data) %>%
+                                        dplyr::mutate(date = ymd(paste(year, month, day, sep = "-"))) %>%
+                                        dplyr::filter(date >= wi$start_date[1], date <= wi$end_date[1]) %>%
+                                        dplyr::select(lat:date, -time))
+
+                count <- count + 1
+            }
+
+
+            #If there is no data for important_variable, choose another station
+            if(!is.null(important_trait)) {
+                # count <- 2
+                while(class(station_data)[1] == "try-error" || length(which(!is.na(station_data[[important_trait]]))) == 0) {
+                    # assign nearest station and station distance to worm
+                    wi <- wi %>%
+                        dplyr::mutate(nearest_station = stations$id[count],
+                                      station_distance = stations$dist_to_worm[count]/1000)
+
+                    #Get station data using stationaRy package
+                    station_data <- try(get_isd_station_data_fix(station_id = wi$nearest_station[1], 
+                                                                 startyear = year(wi$start_date[1]), 
+                                                                 endyear = year(wi$end_date[1]),
+                                                                 select_additional_data = all_data) %>%
+                                            dplyr::mutate(date = ymd(paste(year, month, day, sep = "-"))) %>%
+                                            dplyr::filter(date >= wi$start_date[1], date <= wi$end_date[1]) %>%
+                                            dplyr::select(lat:date, -time))
+
+                    count <- count + 1
+                }
+            }
+
+            # check to make sure precipitation is downloaded, if not insert NA
+            if(!"aa1_1" %in% names(station_data)) {
+                station_data <- station_data %>%
+                    dplyr::mutate(aa1_1 = NA, aa1_2 = NA, aa1_3 = NA, aa1_4 = NA)
+            }
+
+            # remove missing data
+            station_data$wd[station_data$wd == 999] <- NA
+            station_data$ws[station_data$ws == 9999] <- NA
+            station_data$ceil_hgt[station_data$ceil_hgt == 99999] <- NA
+            station_data$temp[station_data$temp == '+9999'] <- NA
+            station_data$dew_point[station_data$dew_point == '+9999'] <- NA
+            station_data$atmos_pres[station_data$atmos_pres == 99999] <- NA
+            station_data$aa1_1[station_data$aa1_1 == 99] <- NA
+            station_data$aa1_2[station_data$aa1_2 == 9999] <- NA
+            station_data$aa1_1[station_data$aa1_4 %in% c(2, 3, 6, 7)] <- NA
+            station_data$aa1_2[station_data$aa1_4 %in% c(2, 3, 6, 7)] <- NA
+
+            # Clean up the preciptation columns
+            # aa1_1 = period quantity (hours), aa1_2 = depth dimension, aa1_4 = quality
+            station_data <- station_data %>%
+                dplyr::mutate(precip = aa1_2 / aa1_1) %>%
+                dplyr::select(-c(aa1_1, aa1_2, aa1_3, aa1_4))
+
+            # add station latitude/longitude/elevation to wi dataframe
+            wi <- wi %>%
+                dplyr::mutate(station_lat = station_data$lat[1],
+                              station_lon = station_data$lon[1],
+                              station_elev = station_data$elev[1])
+
+            # remove lat, long, and elev now
+            station_data <- station_data %>%
+                dplyr::select(-c(lat, lon, elev))
+
+            # add quartiles for rest of station_data to wi dataframe
+            for(j in (names(station_data)[names(station_data) != "date"])) {
+                wi <- wi %>%
+                    dplyr::mutate(!!j := get_quartiles(j)) %>% #assign variable dynamically!!!
+                    tidyr::separate(!!j, into = c(paste0("min.", j), paste0("q10.", j),
+                                                  paste0("q25.", j), paste0("mean.", j),
+                                                  paste0("median.", j), paste0("q75.", j),
+                                                  paste0("q90.", j), paste0("max.", j)), sep = ",")
+            }
+
+            # save dataframe
+            wi <- wi %>%
+                tidyr::gather(trait, value, -c(isotype:station_elev))
         }
     }
-    
-    # check to make sure precipitation is downloaded, if not insert NA
-    if(!"aa1_1" %in% names(station_data)) {
-        station_data <- station_data %>%
-            dplyr::mutate(aa1_1 = NA, aa1_2 = NA, aa1_3 = NA, aa1_4 = NA)
-    }
-    
-    # remove missing data
-    station_data$wd[station_data$wd == 999] <- NA
-    station_data$ws[station_data$ws == 9999] <- NA
-    station_data$ceil_hgt[station_data$ceil_hgt == 99999] <- NA
-    station_data$temp[station_data$temp == '+9999'] <- NA
-    station_data$dew_point[station_data$dew_point == '+9999'] <- NA
-    station_data$atmos_pres[station_data$atmos_pres == 99999] <- NA
-    station_data$aa1_1[station_data$aa1_1 == 99] <- NA
-    station_data$aa1_2[station_data$aa1_2 == 9999] <- NA
-    station_data$aa1_1[station_data$aa1_4 %in% c(2, 3, 6, 7)] <- NA
-    station_data$aa1_2[station_data$aa1_4 %in% c(2, 3, 6, 7)] <- NA
-    
-    # Clean up the preciptation columns
-    # aa1_1 = period quantity (hours), aa1_2 = depth dimension, aa1_4 = quality
-    station_data <- station_data %>%
-        dplyr::mutate(precip = aa1_2 / aa1_1) %>%
-        dplyr::select(-c(aa1_1, aa1_2, aa1_3, aa1_4))
-    
-    # add station latitude/longitude/elevation to wi dataframe
-    wi <- wi %>%
-        dplyr::mutate(station_lat = station_data$lat[1],
-                      station_lon = station_data$lon[1],
-                      station_elev = station_data$elev[1])
-    
-    # remove lat, long, and elev now
-    station_data <- station_data %>%
-        dplyr::select(-c(lat, lon, elev))
-    
-    # add quartiles for rest of station_data to wi dataframe
-    for(j in (names(station_data)[names(station_data) != "date"])) {
-        wi <- wi %>%
-            dplyr::mutate(!!j := get_quartiles(j)) %>% #assign variable dynamically!!!
-            tidyr::separate(!!j, into = c(paste0("min.", j), paste0("q10.", j),
-                                          paste0("q25.", j), paste0("mean.", j),
-                                          paste0("median.", j), paste0("q75.", j),
-                                          paste0("q90.", j), paste0("max.", j)), sep = ",")
-    }
-    
-    # save dataframe
-    wi <- wi %>%
-        tidyr::gather(trait, value, -c(isotype:station_elev))
-}
     
 readr::write_tsv(wi, paste0(wi$isotype[1], ".noaa.tsv"))
     
