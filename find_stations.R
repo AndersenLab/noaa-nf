@@ -44,21 +44,54 @@ get_quartiles <- function(trait) {
                          mean = mean(get(trait), na.rm = T),
                          median = median(get(trait), na.rm = T),
                          q75 = quantile(get(trait), probs = 0.75, na.rm = T)[[1]],
-                         q90 = quantile(get(trait), probs = 0.9, na.rm = T)[[1]])
+                         q90 = quantile(get(trait), probs = 0.9, na.rm = T)[[1]],
+                         sd = sd(get(trait), na.rm = T))
     
+    # remove Inf values
+    val <- do.call(data.frame,lapply(val, function(x) replace(x, is.infinite(x),NA)))
+    val <- do.call(data.frame,lapply(val, function(x) replace(x, is.nan(x),NA)))
     
-    # # get quartiles of data
-    min <- mean(val$min, na.rm = T)
-    max <- mean(val$max, na.rm = T)
-    q10 <- mean(val$q10, na.rm = T)
-    q25 <- mean(val$q25, na.rm = T)
-    mean <- mean(val$mean, na.rm = T)
-    median <- mean(val$median, na.rm = T)
-    q75 <- mean(val$q75, na.rm = T)
-    q90 <- mean(val$q90, na.rm = T)
-    sd <- sd(val$mean, na.rm = T)
+    # # get quartiles of data - means
+    min_mean <- mean(val$min, na.rm = T)
+    max_mean <- mean(val$max, na.rm = T)
+    q10_mean <- mean(val$q10, na.rm = T)
+    q25_mean <- mean(val$q25, na.rm = T)
+    mean_mean <- mean(val$mean, na.rm = T)
+    median_mean <- mean(val$median, na.rm = T)
+    q75_mean <- mean(val$q75, na.rm = T)
+    q90_mean <- mean(val$q90, na.rm = T)
     
-    return(paste(c(min, q10, q25, mean, median, q75, q90, max, sd), collapse = ","))
+    # sd
+    sd_mean <- mean(val$sd, na.rm = T)
+    sd_median <- median(val$sd, na.rm = T)
+    sd_q25 <- quantile(val$sd, probs = 0.25, na.rm = T)[[1]]
+    sd_q75 <- quantile(val$sd, probs = 0.75, na.rm = T)[[1]]
+    mean_sd <- sd(val$mean, na.rm = T)
+    
+    # get quartiles of data - mins
+    min_min <- min(val$min, na.rm = T)
+    min_q10 <- quantile(val$min, probs = 0.1, na.rm = T)[[1]]
+    min_q25 <- quantile(val$min, probs = 0.25, na.rm = T)[[1]]
+    min_mean <- mean(val$min,na.rm = T)
+    min_median <- median(val$min, na.rm = T)
+    min_q75 <- quantile(val$min, probs = 0.75, na.rm = T)[[1]]
+    min_q90 <- quantile(val$min, probs = 0.90, na.rm = T)[[1]]
+    min_max <- max(val$min, na.rm = T)
+    
+    # get quartiles of data - maxs
+    max_min <- min(val$max, na.rm = T)
+    max_q10 <- quantile(val$max, probs = 0.1, na.rm = T)[[1]]
+    max_q25 <- quantile(val$max, probs = 0.25, na.rm = T)[[1]]
+    max_mean <- mean(val$max,na.rm = T)
+    max_median <- median(val$max, na.rm = T)
+    max_q75 <- quantile(val$max, probs = 0.75, na.rm = T)[[1]]
+    max_q90 <- quantile(val$max, probs = 0.90, na.rm = T)[[1]]
+    max_max <- max(val$max, na.rm = T)
+    
+    return(paste(c(min_mean, max_mean, q10_mean, q25_mean, mean_mean, median_mean, q75_mean, q90_mean, 
+                   min_min, min_q10, min_q25, min_mean, min_median, min_q75, min_q90, min_max,
+                   max_min, max_q10, max_q25, max_mean, max_median, max_q75, max_q90, max_max,
+                   sd_mean, sd_median, sd_q25, sd_q75, mean_sd), collapse = ","))
 }
 
 #update wi for start/end dates
