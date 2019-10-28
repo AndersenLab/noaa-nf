@@ -53,8 +53,9 @@ get_quartiles <- function(trait) {
     median <- mean(val$median, na.rm = T)
     q75 <- mean(val$q75, na.rm = T)
     q90 <- mean(val$q90, na.rm = T)
+    sd <- sd(val$mean, na.rm = T)
     
-    return(paste(c(min, q10, q25, mean, median, q75, q90, max), collapse = ","))
+    return(paste(c(min, q10, q25, mean, median, q75, q90, max, sd), collapse = ","))
 }
 
 #update wi for start/end dates
@@ -101,10 +102,10 @@ if(nrow(st) == 0) {
                       value = NA)
 } else {
     # Filter stations based on location and year with data, find closest station
-    stations <- stationaRy::get_isd_stations(lower_lat = wi$latitude[1] - 10,
-                                             upper_lat = wi$latitude[1] + 10,
-                                             lower_lon = wi$longitude[1] - 10,
-                                             upper_lon = wi$longitude[1] + 10) %>%
+    stations <- stationaRy::get_isd_stations(lower_lat = wi$latitude[1] - 15,
+                                             upper_lat = wi$latitude[1] + 15,
+                                             lower_lon = wi$longitude[1] - 15,
+                                             upper_lon = wi$longitude[1] + 15) %>%
         dplyr::mutate(id = paste(usaf, wban, sep = "-")) %>%
         dplyr::filter(id %in% st$id) %>%
         dplyr::rowwise() %>%
