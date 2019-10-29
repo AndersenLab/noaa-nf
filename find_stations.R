@@ -72,7 +72,7 @@ get_quartiles <- function(trait) {
     min_min <- min(val$min, na.rm = T)
     min_q10 <- quantile(val$min, probs = 0.1, na.rm = T)[[1]]
     min_q25 <- quantile(val$min, probs = 0.25, na.rm = T)[[1]]
-    min_mean <- mean(val$min,na.rm = T)
+    # min_mean <- mean(val$min,na.rm = T)
     min_median <- median(val$min, na.rm = T)
     min_q75 <- quantile(val$min, probs = 0.75, na.rm = T)[[1]]
     min_q90 <- quantile(val$min, probs = 0.90, na.rm = T)[[1]]
@@ -82,15 +82,15 @@ get_quartiles <- function(trait) {
     max_min <- min(val$max, na.rm = T)
     max_q10 <- quantile(val$max, probs = 0.1, na.rm = T)[[1]]
     max_q25 <- quantile(val$max, probs = 0.25, na.rm = T)[[1]]
-    max_mean <- mean(val$max,na.rm = T)
+    # max_mean <- mean(val$max,na.rm = T)
     max_median <- median(val$max, na.rm = T)
     max_q75 <- quantile(val$max, probs = 0.75, na.rm = T)[[1]]
     max_q90 <- quantile(val$max, probs = 0.90, na.rm = T)[[1]]
     max_max <- max(val$max, na.rm = T)
     
     return(paste(c(min_mean, max_mean, q10_mean, q25_mean, mean_mean, median_mean, q75_mean, q90_mean, 
-                   min_min, min_q10, min_q25, min_mean, min_median, min_q75, min_q90, min_max,
-                   max_min, max_q10, max_q25, max_mean, max_median, max_q75, max_q90, max_max,
+                   min_min, min_q10, min_q25, min_median, min_q75, min_q90, min_max,
+                   max_min, max_q10, max_q25, max_median, max_q75, max_q90, max_max,
                    sd_mean, sd_median, sd_q25, sd_q75, mean_sd), collapse = ","))
 }
 
@@ -257,34 +257,34 @@ if(nrow(st) == 0) {
                 wi <- wi %>%
                     dplyr::mutate(!!j := get_quartiles(j)) %>% #assign variable dynamically!!!
                     tidyr::separate(!!j, into = c(paste0("min_mean.", j), 
-                                                  paste0("max_mean", j),
-                                                  paste0("q10_mean", j),
-                                                  paste0("q25_mean", j),
-                                                  paste0("mean_mean", j),
-                                                  paste0("median_mean", j),
-                                                  paste0("q75_mean", j),
-                                                  paste0("q90_mean", j),
-                                                  paste0("min_min", j),
-                                                  paste0("min_q10", j),
-                                                  paste0("min_q25", j),
-                                                  paste0("min_mean", j),
-                                                  paste0("min_median", j),
-                                                  paste0("min_q75", j),
-                                                  paste0("min_q90", j),
-                                                  paste0("min_max", j),
-                                                  paste0("max_min", j),
-                                                  paste0("max_q10", j),
-                                                  paste0("max_q25", j),
-                                                  paste0("max_mean", j),
-                                                  paste0("max_median", j),
-                                                  paste0("max_q75", j),
-                                                  paste0("max_q90", j),
-                                                  paste0("max_max", j),
-                                                  paste0("sd_mean", j),
-                                                  paste0("sd_median", j),
-                                                  paste0("sd_q25", j),
-                                                  paste0("sd_q75", j),
-                                                  paste0("mean_sd", j)), 
+                                                  paste0("max_mean.", j),
+                                                  paste0("q10_mean.", j),
+                                                  paste0("q25_mean.", j),
+                                                  paste0("mean_mean.", j),
+                                                  paste0("median_mean.", j),
+                                                  paste0("q75_mean.", j),
+                                                  paste0("q90_mean.", j),
+                                                  paste0("min_min.", j),
+                                                  paste0("min_q10.", j),
+                                                  paste0("min_q25.", j),
+                                                  # paste0("min_mean", j),
+                                                  paste0("min_median.", j),
+                                                  paste0("min_q75.", j),
+                                                  paste0("min_q90.", j),
+                                                  paste0("min_max.", j),
+                                                  paste0("max_min.", j),
+                                                  paste0("max_q10.", j),
+                                                  paste0("max_q25.", j),
+                                                  # paste0("max_mean", j),
+                                                  paste0("max_median.", j),
+                                                  paste0("max_q75.", j),
+                                                  paste0("max_q90.", j),
+                                                  paste0("max_max.", j),
+                                                  paste0("sd_mean.", j),
+                                                  paste0("sd_median.", j),
+                                                  paste0("sd_q25.", j),
+                                                  paste0("sd_q75.", j),
+                                                  paste0("mean_sd.", j)), 
                                     sep = ",")
             }
 
