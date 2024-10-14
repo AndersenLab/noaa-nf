@@ -6,11 +6,11 @@ source(args[6])
 
 library(lubridate)
 #library(tidyverse)
-library(dplyr)
 library(tidyr)
 library(readr)
 library(stationaRy)
 library(geosphere)
+library(dplyr)
 
 # args[1] = input dat#aframe
 # args[2] = station dataframe

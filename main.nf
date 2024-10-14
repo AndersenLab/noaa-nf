@@ -1,14 +1,15 @@
 #! usr/bin/env nextflow
 
 params.samples = "${workflow.projectDir}/test_data/wild_isolates.csv"
+params.isd_inventory = "${workflow.projectDir}/isd-inventory.csv"
 
 if (params.out == null){
-    params.outdir = noaa_analysis_${date}
+    params.outdir = "noaa_analysis_${params.day}"
 } else {
     params.outdir = params.out
 }
 
-if (params.help){
+if (params.help | params.debug){
     params.input = "${workflow.projectDir}/test_data/noaa_test.csv"
 } else {
     params.input = params.samples
@@ -19,8 +20,9 @@ if (params.help){
 
 workflow {
     Channel.fromPath(params.input) | split_WI
-    split_WI.out.flatten() | findStations
-    findStations.toSortedList() | joinData
+    split_WI.out.flatten()
+        .combine(Channel.of( params.isd_inventory) ) | findStations
+    findStations.out.toSortedList() | joinData
 }
 process split_WI {
   label 'xs'
@@ -79,14 +81,14 @@ process findStations {
   tag { wi_location }
 
   input:
-    path(wi_location)
+    tuple path(wi_location), path(isd_inventory)
 
   output:
     path("*.noaa.tsv")
 
 
   """
-  Rscript --vanilla "${workflow.projectDir}/bin/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" "${workflow.projectDir}/bin/get_isd_station_data_fix.R"
+  Rscript --vanilla "${workflow.projectDir}/bin/find_stations.R" "${wi_location}" "${isd_inventory}" "${params.months}" "${params.events}" "${params.important_trait}" "${workflow.projectDir}/bin/get_isd_station_data_fix.R"
 
   """
 
@@ -94,7 +96,7 @@ process findStations {
 
 
 process joinData {
-    publishDir "${params.out}/", mode: 'copy'
+    publishDir "${params.outdir}/", mode: 'copy'
 
     executor "local"
     container null

@@ -17,3 +17,5 @@ dependencies:
   - r-progress
   - r-stringr
   - r-plyr
+  - r-leaflet
+  - r-magrittr
