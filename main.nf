@@ -1,5 +1,7 @@
 #! usr/bin/env nextflow
 
+params.samples = "${workflow.projectDir}/test_data/wild_isolates.csv"
+
 if (params.out == null){
     params.outdir = noaa_analysis_${date}
 } else {
