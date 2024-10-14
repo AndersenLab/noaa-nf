@@ -1,0 +1,19 @@
+name: r_packages
+channels:
+  - defaults
+  - bioconda
+  - r
+  - biobuilds
+  - conda-forge
+dependencies:
+  - r=3.6.0
+  - r-readr
+  - r-dplyr
+  - r-tidyr
+  - r-geonames
+  - r-lubridate
+  - r-geosphere
+  - r-downloader
+  - r-progress
+  - r-stringr
+  - r-plyr

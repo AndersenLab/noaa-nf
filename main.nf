@@ -1,20 +1,33 @@
 #! usr/bin/env nextflow
 
-// params.in
-params.months = '3'
-params.important_trait = 'NULL'
-params.events = '10'
-date = new Date().format( 'yyyyMMdd' )
-params.out = "$date"
+if (params.out == null){
+    params.outdir = noaa_analysis_${date}
+} else {
+    params.outdir = params.out
+}
+
+if (params.help){
+    params.input = "${workflow.projectDir}/test_data/noaa_test.csv"
+} else {
+    params.input = params.samples
+}
 
 // takes input csv with columns "isotype", "latitude", "longitude", and "isolation_date"
 // and returns a tsv file for each strain with added elevation from geonames package
+
+workflow {
+    Channel.fromPath(params.input) | split_WI
+    split_WI.out.flatten() | findStations
+    findStations.toSortedList() | joinData
+}
 process split_WI {
+  label 'xs'
+
   input:
-  file "infile" from Channel.fromPath(params.in)
+    path(infile)
 
   output:
-  file("*.raw.tsv") into locations
+    path("*.raw.tsv")
 
   """
   
@@ -59,18 +72,19 @@ process split_WI {
 
 // for each strain, finds the closest weather station and download relevant data
 process findStations {
-  cpus 4
+  label "sm"
+
   tag { wi_location }
 
   input:
-  file wi_location from locations.flatten()
+    path(wi_location)
 
   output:
-  file("*.noaa.tsv") into noaa_files
+    path("*.noaa.tsv")
 
 
   """
-  Rscript --vanilla "${workflow.projectDir}/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" "${workflow.projectDir}/get_isd_station_data_fix.R"
+  Rscript --vanilla "${workflow.projectDir}/bin/find_stations.R" "${wi_location}" "${workflow.projectDir}/isd-inventory.csv" "${params.months}" "${params.events}" "${params.important_trait}" "${workflow.projectDir}/bin/get_isd_station_data_fix.R"
 
   """
 
@@ -78,17 +92,20 @@ process findStations {
 
 
 process joinData {
-    publishDir "analysis-${params.out}/", mode: 'copy'
-    
+    publishDir "${params.out}/", mode: 'copy'
+
+    executor "local"
+    container null
+
     input:
-        val(strain_file) from noaa_files.toSortedList()
+        val(strain_file)
 
     output:
-        file("phenotype-${params.out}.tsv") into output
+        file("phenotypes.tsv")
 
     """
     # use this to only print the header of the first line
-    awk 'FNR>1 || NR==1' ${strain_file.join(" ")} > phenotype-${params.out}.tsv
+    awk 'FNR>1 || NR==1' ${strain_file.join(" ")} > phenotypes.tsv
     """
 }
 
