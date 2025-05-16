@@ -179,6 +179,20 @@ if(nrow(st) == 0) {
             #Check to see if the station_data file downloaded, if not, try the next closest station
             count <- 2
             while(class(station_data)[1] == "try-error") {
+                print(paste(count, length(stations)))
+                if(count > length(stations)) {
+                        print("Error. No station data avaiable for this time period. Entering 'NA'.")
+                        wi <- wi %>%
+                        dplyr::mutate(nearest_station = NA,
+                                    station_distance = NA,
+                                    station_lat = NA,
+                                    station_lon = NA,
+                                    station_elev = NA,
+                                    trait = NA,
+                                    value = NA)
+                        readr::write_tsv(wi, paste0(wi$isotype[1], ".noaa.tsv"))
+                        exit(0)
+                }
                 wi <- wi %>%
                     dplyr::mutate(nearest_station = stations$id[count],
                                   station_distance = stations$dist_to_worm[count]/1000)
@@ -198,8 +212,23 @@ if(nrow(st) == 0) {
 
             #If there is no data for important_variable, choose another station
             if(!is.null(important_trait)) {
+
                 # count <- 2
                 while(class(station_data)[1] == "try-error" || length(which(!is.na(station_data[[important_trait]]))) == 0) {
+                print(paste(count, length(stations)))
+                if(count > length(stations)) {
+                        print("Error. No station data avaiable for this time period. Entering 'NA'.")
+                        wi <- wi %>%
+                        dplyr::mutate(nearest_station = NA,
+                                    station_distance = NA,
+                                    station_lat = NA,
+                                    station_lon = NA,
+                                    station_elev = NA,
+                                    trait = NA,
+                                    value = NA)
+                        readr::write_tsv(wi, paste0(wi$isotype[1], ".noaa.tsv"))
+                        exit(0)
+                }
                     # assign nearest station and station distance to worm
                     wi <- wi %>%
                         dplyr::mutate(nearest_station = stations$id[count],
