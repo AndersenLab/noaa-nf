@@ -191,7 +191,7 @@ if(nrow(st) == 0) {
                                     trait = NA,
                                     value = NA)
                         readr::write_tsv(wi, paste0(wi$isotype[1], ".noaa.tsv"))
-                        exit(0)
+                        stop()
                 }
                 wi <- wi %>%
                     dplyr::mutate(nearest_station = stations$id[count],
@@ -227,7 +227,7 @@ if(nrow(st) == 0) {
                                     trait = NA,
                                     value = NA)
                         readr::write_tsv(wi, paste0(wi$isotype[1], ".noaa.tsv"))
-                        exit(0)
+                        stop()
                 }
                     # assign nearest station and station distance to worm
                     wi <- wi %>%
